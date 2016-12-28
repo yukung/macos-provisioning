@@ -64,8 +64,6 @@
       register: brew_result
     - name: create directory of package information
       file: path=brew_info state=directory
-    - name: debug
-      debug: msg="{{ brew_result }}"
     - name: store the homebrew package information
       shell: "brew info {{ item }} > brew_info/{{ item }}"
       with_items: "{{ brew_result.results | selectattr('changed') | map(attribute='item') | list }}"
@@ -92,8 +90,6 @@
     - name: extract exe file
       shell: cabextract -d ~/Download/consolas ~/Download/consolas/PowerPointViewer.exe
       register: extract_result
-    - name: debug
-      debug: msg="{{ extract_result }}"
     - name: extract cab file
       shell: cabextract -d ~/Download/consolas ~/Download/consolas/ppviewer.cab
       when: "{{ extract_result.rc == 0 }}"
