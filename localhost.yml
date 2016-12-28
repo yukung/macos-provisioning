@@ -82,6 +82,28 @@
       args:
         creates: ~/Library/Fonts/Ricty-Bold.ttf
       notify: run fc-cache
+    - name: install cabextract for Consolas font
+      homebrew: name=cabextract state=latest
+    - name: create working directory for Consolas font
+      file: path=~/Download/consolas state=directory
+    - name: download PowerPointViewer for Consolas font
+      get_url: url="http://download.microsoft.com/download/f/5/a/f5a3df76-d856-4a61-a6bd-722f52a5be26/PowerPointViewer.exe" dest="~/Download/consolas"
+               sha256sum="c4e753548d3092ffd7dd3849105e0a26d9b5a1afe46e6e667fe7c6887893701f" force=yes
+    - name: extract exe file
+      shell: cabextract -d ~/Download/consolas ~/Download/consolas/PowerPointViewer.exe
+      register: extract_result
+    - name: debug
+      debug: msg="{{ extract_result }}"
+    - name: extract cab file
+      shell: cabextract -d ~/Download/consolas ~/Download/consolas/ppviewer.cab
+      when: "{{ extract_result.rc == 0 }}"
+    - name: copy the extracted font files
+      shell: cp -f ~/Download/consolas/CONSOLA*.TTF ~/Library/Fonts/
+      args:
+        creates: ~/Library/Fonts/CONSOLA.TTF
+      notify: run fc-cache
+    - name: remove working directory
+      file: path=~/Download/consolas state=absent
   handlers:
     - name: run fc-cache
       shell: fc-cache -vf
