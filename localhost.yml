@@ -2,7 +2,14 @@
   connection: local
   gather_facts: no
   become: no
+  vars:
+    homebrew_taps:
+      - caskroom/cask
+      - sanemat/font
   tasks:
+    - name: add third party repositories
+      homebrew_tap: tap="{{ item }}" state=present
+      with_items: "{{ homebrew_taps }}"
     - name: update homebrew
       homebrew: update_homebrew=yes
     - name: install homebrew packages
@@ -37,6 +44,23 @@
         - ruby-build
         - rbenv
         - nodebrew
+        # dependencies for fontforge
+        - libtool
+        - gettext
+        - libffi
+        - pcre
+        - glib
+        - freetype
+        - libpng
+        - pixman
+        - fontconfig
+        - cairo
+        - gobject-introspection
+        - icu4c
+        - harfbuzz
+        - pango
+        - jpeg
+        - libtiff
       register: brew_result
     - name: create directory of package information
       file: path=brew_info state=directory
@@ -45,3 +69,19 @@
     - name: store the homebrew package information
       shell: "brew info {{ item }} > brew_info/{{ item }}"
       with_items: "{{ brew_result.results | selectattr('changed') | map(attribute='item') | list }}"
+    - name: install homebrew-cask
+      homebrew: name=cask state=latest
+    - name: install xquartz for Ricty font
+      homebrew_cask: name=xquartz
+    - name: install fontforge for Ricty font
+      homebrew: name=fontforge
+    - name: install Ricty font
+      homebrew: name=ricty
+    - name: copy the generated font files
+      shell: cp -f $(brew --cellar ricty)/*/share/fonts/Ricty*.ttf ~/Library/Fonts/
+      args:
+        creates: ~/Library/Fonts/Ricty-Bold.ttf
+      notify: run fc-cache
+  handlers:
+    - name: run fc-cache
+      shell: fc-cache -vf
