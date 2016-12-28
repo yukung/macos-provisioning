@@ -3,5 +3,45 @@
   gather_facts: no
   become: no
   tasks:
-    - name: check
-      debug: msg="Hello, ansible!"
+    - name: update homebrew
+      homebrew: update_homebrew=yes
+    - name: install homebrew packages
+      homebrew: name="{{ item }}" state=present
+      with_items:
+        - readline
+        - sqlite
+        - gdbm
+        - openssl
+        - python
+        - libyaml
+        # openssl@1.1 will be installed for ansible. However, from ansible it is regarded as an invalid package name.
+        - ansible
+        - bash-completion
+        - git
+        - tig
+        - wget
+        - tree
+        - nkf
+        - oniguruma
+        - jq
+        - pstree
+        - colordiff
+        - boost
+        - source-highlight
+        - libevent
+        - tmux
+        - reattach-to-user-namespace
+        - htop
+        - autoconf
+        - pkg-config
+        - ruby-build
+        - rbenv
+        - nodebrew
+      register: brew_result
+    - name: create directory of package information
+      file: path=brew_info state=directory
+    - name: debug
+      debug: msg="{{ brew_result }}"
+    - name: store the homebrew package information
+      shell: "brew info {{ item }} > brew_info/{{ item }}"
+      with_items: "{{ brew_result.results | selectattr('changed') | map(attribute='item') | list }}"
