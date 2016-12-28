@@ -104,6 +104,8 @@
       notify: run fc-cache
     - name: remove working directory
       file: path=~/Download/consolas state=absent
+    - name: uninstall cabextract
+      homebrew: name=cabextract state=absent
   handlers:
     - name: run fc-cache
       shell: fc-cache -vf
