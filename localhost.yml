@@ -44,23 +44,6 @@
         - ruby-build
         - rbenv
         - nodebrew
-        # dependencies for fontforge
-        - libtool
-        - gettext
-        - libffi
-        - pcre
-        - glib
-        - freetype
-        - libpng
-        - pixman
-        - fontconfig
-        - cairo
-        - gobject-introspection
-        - icu4c
-        - harfbuzz
-        - pango
-        - jpeg
-        - libtiff
       register: brew_result
     - name: create directory of package information
       file: path=brew_info state=directory
@@ -69,39 +52,70 @@
       with_items: "{{ brew_result.results | selectattr('changed') | map(attribute='item') | list }}"
     - name: install homebrew-cask
       homebrew: name=cask state=latest
-    - name: install xquartz for Ricty font
-      homebrew_cask: name=xquartz
-    - name: install fontforge for Ricty font
-      homebrew: name=fontforge
-    - name: install Ricty font
-      homebrew: name=ricty
-    - name: copy the generated font files
-      shell: cp -f $(brew --cellar ricty)/*/share/fonts/Ricty*.ttf ~/Library/Fonts/
-      args:
-        creates: ~/Library/Fonts/Ricty-Bold.ttf
-      notify: run fc-cache
-    - name: install cabextract for Consolas font
-      homebrew: name=cabextract state=latest
-    - name: create working directory for Consolas font
-      file: path=~/Download/consolas state=directory
-    - name: download PowerPointViewer for Consolas font
-      get_url: url="http://download.microsoft.com/download/f/5/a/f5a3df76-d856-4a61-a6bd-722f52a5be26/PowerPointViewer.exe" dest="~/Download/consolas"
-               sha256sum="c4e753548d3092ffd7dd3849105e0a26d9b5a1afe46e6e667fe7c6887893701f" force=yes
-    - name: extract exe file
-      shell: cabextract -d ~/Download/consolas ~/Download/consolas/PowerPointViewer.exe
-      register: extract_result
-    - name: extract cab file
-      shell: cabextract -d ~/Download/consolas ~/Download/consolas/ppviewer.cab
-      when: "{{ extract_result.rc == 0 }}"
-    - name: copy the extracted font files
-      shell: cp -f ~/Download/consolas/CONSOLA*.TTF ~/Library/Fonts/
-      args:
-        creates: ~/Library/Fonts/CONSOLA.TTF
-      notify: run fc-cache
-    - name: remove working directory
-      file: path=~/Download/consolas state=absent
-    - name: uninstall cabextract
-      homebrew: name=cabextract state=absent
-  handlers:
-    - name: run fc-cache
-      shell: fc-cache -vf
+    # install ricty font
+    - stat: path=~/Library/Fonts/Ricty-Regular.ttf
+      register: is_ricty_installed
+    - block:
+      - name: install xquartz for Ricty font
+        homebrew_cask: name=xquartz state=present
+      - name: install dependencies for Ricty font
+        homebrew: name=fontforge state=present
+      - name: install Ricty font
+        homebrew: name=ricty state=present
+      - name: copy the generated font files
+        shell: cp -f $(brew --cellar ricty)/*/share/fonts/Ricty*.ttf ~/Library/Fonts/
+        args:
+          creates: ~/Library/Fonts/Ricty-Bold.ttf
+      - name: run fc-cache
+        shell: fc-cache -vf
+      - name: uninstall xquartz for Ricty font
+        homebrew_cask: name=xquartz state=absent
+      - name: uninstall dependencies for Ricty font
+        homebrew: name="{{ item }}" state=absent
+        with_items:
+          # dependencies for fontforge
+          - ricty
+          - fontforge
+          - pango
+          - harfbuzz
+          - gobject-introspection
+          - cairo
+          - fontconfig
+          - freetype
+          - libpng
+          - glib
+          - gettext
+          - libtool
+          - libffi
+          - pcre
+          - pixman
+          - icu4c
+          - libtiff
+          - jpeg
+      when: "{{ is_ricty_installed.stat.md5 is not defined }}"
+    # install consolas font
+    - stat: path=~/Library/Fonts/CONSOLA.TTF
+      register: is_consolas_installed
+    - block:
+      - name: install cabextract for Consolas font
+        homebrew: name=cabextract state=latest
+      - name: create working directory for Consolas font
+        file: path=~/Download/consolas state=directory
+      - name: download PowerPointViewer for Consolas font
+        get_url: url="http://download.microsoft.com/download/f/5/a/f5a3df76-d856-4a61-a6bd-722f52a5be26/PowerPointViewer.exe" dest="~/Download/consolas"
+                 sha256sum="c4e753548d3092ffd7dd3849105e0a26d9b5a1afe46e6e667fe7c6887893701f" force=yes
+      - name: extract exe file
+        shell: cabextract -d ~/Download/consolas ~/Download/consolas/PowerPointViewer.exe
+        register: extract_result
+      - name: extract cab file
+        shell: cabextract -d ~/Download/consolas ~/Download/consolas/ppviewer.cab
+        when: "{{ extract_result.rc == 0 }}"
+      - name: copy the extracted font files
+        shell: cp -f ~/Download/consolas/CONSOLA*.TTF ~/Library/Fonts/
+        args:
+          creates: ~/Library/Fonts/CONSOLA.TTF
+      - name: remove working directory
+        file: path=~/Download/consolas state=absent
+      - name: uninstall cabextract
+        homebrew: name=cabextract state=absent
+      when: "{{ is_consolas_installed.stat.md5 is not defined }}"
