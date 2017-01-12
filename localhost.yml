@@ -47,6 +47,7 @@
         - ruby-build
         - rbenv
         - nodebrew
+        - awscli
         - terraform
       register: brew_result
     - name: create directory of package information
