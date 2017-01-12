@@ -47,6 +47,7 @@
         - ruby-build
         - rbenv
         - nodebrew
+        - terraform
       register: brew_result
     - name: create directory of package information
       file: path=brew_info state=directory
