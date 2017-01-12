@@ -3,6 +3,7 @@
   gather_facts: no
   become: no
   vars:
+    mas_enabled: false
     homebrew_taps:
       - caskroom/cask
       - sanemat/font
@@ -23,6 +24,8 @@
         - libyaml
         # openssl@1.1 will be installed for ansible. However, from ansible it is regarded as an invalid package name.
         - ansible
+        - cask
+        - mas
         - bash-completion
         - git
         - tig
@@ -50,8 +53,82 @@
     - name: store the homebrew package information
       shell: "brew info {{ item }} > brew_info/{{ item }}"
       with_items: "{{ brew_result.results | selectattr('changed') | map(attribute='item') | list }}"
-    - name: install homebrew-cask
-      homebrew: name=cask state=latest
+    - name: install homebrew cask packages
+      homebrew_cask: name="{{ item }}" state=present
+      with_items:
+        - appcleaner
+        - google-japanese-ime
+        - cmd-eikana
+        - clipy
+        - alfred
+        - bartender
+        - shiftit
+        - flux
+        - google-chrome
+        - dropbox
+        - skype
+        - github-desktop
+        - sourcetree
+        - macdown
+        - iterm2
+        - atom
+        - visual-studio-code
+        - intellij-idea
+        - dash
+        - virtualbox
+        - vagrant
+        - vagrant-manager
+        - docker
+        - tunnelblick
+        - gyazo
+        - licecap
+        - istumbler
+        - time-sink
+        - toggldesktop
+    - name: name install App Store provides apps
+      shell: mas install "{{ item.id }}"
+      with_items:
+        - name: 1Password
+          id: 443987910
+        - name: Slack
+          id: 803453959
+        - name: Keynote
+          id: 409183694
+        - name: Numbers
+          id: 409203825
+        - name: Pages
+          id: 409201541
+        - name: The Unarchiver
+          id: 425424353
+        - name: WinArchiver Lite
+          id: 414855915
+        - name: Evernote
+          id: 406056744
+        - name: Skitch
+          id: 425955336
+        - name: Day One
+          id: 1055511498
+        - name: Quiver
+          id: 866773894
+        - name: Kobito
+          id: 896624060
+        - name: Wunderlist
+          id: 410628904
+        - name: Todoist
+          id: 585829637
+        - name: Microsoft Remote Desktop
+          id: 715768417
+        - name: Pocket
+          id: 568494494
+        - name: YoruFukurou
+          id: 428834068
+        - name: LINE
+          id: 539883307
+        - name: Kinoppy
+          id: 572547904
+        - name: Spark
+          id: 1176895641
+      when: "{{ mas_enabled }}"
     # install ricty font
     - stat: path=~/Library/Fonts/Ricty-Regular.ttf
       register: is_ricty_installed
