@@ -85,6 +85,12 @@
         - istumbler
         - time-sink
         - toggldesktop
+      register: cask_result
+    - name: create directory of package information for homebrew cask
+      file: path=cask_info state=directory
+    - name: store the homebrew cask package information
+      shell: "brew cask info {{ item }} > cask_info/{{ item }}"
+      with_items: "{{ cask_result.results | selectattr('changed') | map(attribute='item') | list }}"
     - name: name install App Store provides apps
       shell: mas install "{{ item.id }}"
       with_items:
