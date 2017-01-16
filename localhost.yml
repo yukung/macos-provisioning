@@ -204,3 +204,115 @@
       - name: uninstall cabextract
         homebrew: name=cabextract state=absent
       when: "{{ is_consolas_installed.stat.md5 is not defined }}"
+    # system preference provisioning
+    - name: Configure global domain defaults settings
+      osx_defaults:
+        domain: "{{ item.domain | default('NSGlobalDomain') }}"
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+        state: present
+      with_items:
+        - {
+          key: InitialKeyRepeat,
+          type: int,
+          value: 15
+          }
+        - {
+          key: KeyRepeat,
+          type: int,
+          value: 2
+          }
+        - {
+          key: com.apple.trackpad.scaling,
+          type: float,
+          value: 1
+          }
+        - {
+          key: com.apple.keyboard.fnState,
+          type: bool,
+          value: true
+          }
+        - {
+          key: AppleShowAllExtensions,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.driver.AppleBluetoothMultitouch.trackpad,
+          key: Clicking,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.driver.AppleBluetoothMultitouch.trackpad,
+          key: TrackpadThreeFingerTapGesture,
+          type: int,
+          value: 2
+          }
+        - {
+          domain: com.apple.finder,
+          key: AppleShowAllFiles,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.finder,
+          key: ShowExternalHardDrivesOnDesktop,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.finder,
+          key: ShowRemovableMediaOnDesktop,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.finder,
+          key: ShowPathbar,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.finder,
+          key: ShowSidebar,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.finder,
+          key: ShowStatusBar,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.finder,
+          key: ShowTabView,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.dock,
+          key: autohide,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.dock,
+          key: magnification,
+          type: bool,
+          value: true
+          }
+        - {
+          domain: com.apple.dock,
+          key: orientation,
+          type: string,
+          value: "bottom"
+          }
+        - {
+          domain: com.apple.dock,
+          key: tilesize,
+          type: float,
+          value: 39
+          }
