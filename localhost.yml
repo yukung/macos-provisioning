@@ -85,7 +85,6 @@
         - gyazo
         - licecap
         - istumbler
-        - time-sink
         - toggldesktop
       register: cask_result
     - name: create directory of package information for homebrew cask
@@ -124,6 +123,8 @@
           id: 410628904
         - name: Todoist
           id: 585829637
+        - name: Time Sink
+          id: 404363161
         - name: Microsoft Remote Desktop
           id: 715768417
         - name: Pocket
