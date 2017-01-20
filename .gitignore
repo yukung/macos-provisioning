@@ -1,2 +1,3 @@
 *.retry
 brew_info/
+cask_info/
