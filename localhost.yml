@@ -6,6 +6,7 @@
     mas_enabled: false
     homebrew_taps:
       - caskroom/cask
+      - caskroom/versions
       - sanemat/font
   tasks:
     - name: add third party repositories
@@ -87,6 +88,7 @@
         - licecap
         - istumbler
         - toggldesktop
+        - java
       register: cask_result
     - name: create directory of package information for homebrew cask
       file: path=cask_info state=directory
