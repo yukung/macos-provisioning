@@ -99,6 +99,8 @@
     - name: name install App Store provides apps
       shell: mas install "{{ item.id }}"
       with_items:
+        - name: Xcode
+          id: 497799835
         - name: 1Password
           id: 443987910
         - name: Slack
