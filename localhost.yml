@@ -90,6 +90,7 @@
         - istumbler
         - toggldesktop
         - java
+        - mysqlworkbench
       register: cask_result
     - name: create directory of package information for homebrew cask
       file: path=cask_info state=directory
