@@ -15,7 +15,7 @@
     - name: update homebrew
       homebrew: update_homebrew=yes
     - name: install homebrew packages
-      homebrew: name="{{ item }}" state=present
+      homebrew: name="{{ item }}" state=latest
       with_items:
         - readline
         - sqlite
